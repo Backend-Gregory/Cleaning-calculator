@@ -15,7 +15,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_ID = int(os.getenv("ADMIN_ID"))
 WEBHOOK_PATH = "/webhook"
-BASE_URL = "https://cleaning-calc-bot.onrender.com"  # 👈 замени на свой фикс URL
+BASE_URL = "https://cleaning-calc-bot-4xbj.onrender.com"
 WEBHOOK_URL = f"{BASE_URL}{WEBHOOK_PATH}"
 
 logging.basicConfig(level=logging.INFO)
