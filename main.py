@@ -68,3 +68,12 @@ async def get_name(message: types.Message, state: FSMContext):
     await state.update_data(name=message.text)
     await state.set_state(CleaningForm.phone)
     await message.answer('Какой у вас номер телефона?')
+
+@dp.message(CleaningForm.phone)
+async def get_phone(message: types.Message, state: FSMContext):
+    if not message.text.strip():
+        await message.answer('❌ Номер телефона не может быть пустым')
+        return
+    await state.update_data(phone=message.text)
+    await state.set_state(CleaningForm.address)
+    await message.answer('Какой у вас адрес?')
