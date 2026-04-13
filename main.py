@@ -18,3 +18,10 @@ class CleaningForm(StatesGroup):
     name = State()
     phone = State()
     address = State()
+
+kb = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text='Рассчитать уборку')]
+    ],
+    resize_keyboard=True
+)
