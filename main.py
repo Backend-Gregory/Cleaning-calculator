@@ -44,7 +44,7 @@ async def start_calculation(message: types.Message, state: FSMContext):
 @dp.message(CleaningForm.area)
 async def get_area(message: types.Message, state: FSMContext):
     if not message.text.strip():
-        await message.answer('Площадь не может быть пустой')
+        await message.answer('❌ Площадь не может быть пустой')
         return
     try:
         area = float(message.text.replace(',', '.'))
@@ -56,3 +56,15 @@ async def get_area(message: types.Message, state: FSMContext):
     await state.update_data(area=area, price=price)
     await state.set_state(CleaningForm.name)
     await message.answer('Как вас завут?')
+
+@dp.message(CleaningForm.name)
+async def get_name(message: types.Message, state: FSMContext):
+    if not message.text.strip():
+        await message.answer('❌ Имя не может быть пустым')
+        return
+    if len(message.text) > 100:
+        await message.answer('❌ Имя не должно быть длиннее 100 символов')
+        return
+    await state.update_data(name=message.text)
+    await state.set_state(CleaningForm.phone)
+    await message.answer('Какой у вас номер телефона?')
