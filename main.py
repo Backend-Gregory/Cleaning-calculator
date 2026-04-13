@@ -15,7 +15,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_ID = int(os.getenv("ADMIN_ID"))
 WEBHOOK_PATH = "/webhook"
-BASE_URL = os.getenv("RENDER_EXTERNAL_URL", "https://your-app.onrender.com")
+BASE_URL = "https://cleaning-calc-bot.onrender.com"  # 👈 замени на свой фикс URL
 WEBHOOK_URL = f"{BASE_URL}{WEBHOOK_PATH}"
 
 logging.basicConfig(level=logging.INFO)
@@ -67,7 +67,6 @@ async def get_area(message: types.Message, state: FSMContext):
     except ValueError:
         await message.answer("❌ Введите число (например, 45 или 45.5)")
         return
-    
     price = area * 200
     await state.update_data(area=area, price=price)
     await state.set_state(CleaningForm.name)
@@ -101,14 +100,12 @@ async def get_address(message: types.Message, state: FSMContext):
         return
     await state.update_data(address=message.text)
     data = await state.get_data()
-    
     text = f"📝 Новая заявка!\n\n"
     text += f"Площадь: {data.get('area')} м²\n"
     text += f"Сумма: {data.get('price')}₽\n"
     text += f"Имя: {data.get('name')}\n"
     text += f"Телефон: {data.get('phone')}\n"
     text += f"Адрес: {data.get('address')}"
-    
     try:
         await bot.send_message(ADMIN_ID, text)
         await message.answer('✅ Спасибо! Мы свяжемся с вами.', reply_markup=kb)
@@ -116,33 +113,22 @@ async def get_address(message: types.Message, state: FSMContext):
     except Exception:
         await message.answer('❌ Не удалось отправить заявку. Попробуйте позже', reply_markup=kb)
 
-# --- FastAPI + Webhook ---
+# --- FastAPI + только приём webhook (без автоустановки) ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await bot.set_webhook(WEBHOOK_URL)
-    logging.info(f"Webhook установлен: {WEBHOOK_URL}")
+    logging.info(f"FastAPI started, webhook should be set manually")
     yield
-    await bot.delete_webhook()
     await bot.session.close()
 
 app = FastAPI(lifespan=lifespan)
 
-webhook_checked = False
-
 @app.post(WEBHOOK_PATH)
 async def webhook(request: Request) -> Response:
-    global webhook_checked
-    if not webhook_checked:
-        try:
-            await bot.delete_webhook()
-            await bot.set_webhook(WEBHOOK_URL)
-            logging.info(f"Webhook forcibly set on first request: {WEBHOOK_URL}")
-        except Exception as e:
-            logging.error(f"Failed to set webhook: {e}")
-        webhook_checked = True
-    
-    update = types.Update.model_validate(await request.json(), context={"bot": bot})
-    await dp.feed_update(bot, update)
+    try:
+        update = types.Update.model_validate(await request.json(), context={"bot": bot})
+        await dp.feed_update(bot, update)
+    except Exception as e:
+        logging.error(f"Webhook error: {e}")
     return Response(status_code=200)
 
 @app.get("/health")
