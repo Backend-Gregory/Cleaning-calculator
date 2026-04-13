@@ -82,4 +82,18 @@ async def get_phone(message: types.Message, state: FSMContext):
 async def get_address(message: types.Message, state: FSMContext):
     if not message.text.strip():
         await message.answer('❌ Адрес не может быть пустым')
+        return
     await state.update_data(address=message.text)
+    data = await state.get_data()
+    text = "📝 Новая заявка!\n\n"
+    text += f"Площадь: {data.get('area')}м²\n"
+    text += f"Сумма: {data.get('price')}₽\n"
+    text += f"Имя: {data.get('name')}\n"
+    text += f"Телефон: {data.get('phone')}\n"
+    text += f"Адрес: {data.get('address')}"
+    try:
+        await bot.send_message(ADMIN_ID, text)
+        await state.clear()
+        await message.answer('✅ Спасибо! Мы свяжемся с вами.', reply_markup=kb)
+    except Exception:
+        await message.answer('❌ Не удалось отправить заявку. Попробуйте позже')
