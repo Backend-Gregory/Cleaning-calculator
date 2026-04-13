@@ -35,3 +35,8 @@ async def start(message: types.Message, state: FSMContext):
         "👇 Нажми на кнопку «Рассчитать уборку», чтобы начать.\n",
         reply_markup=kb
     )
+
+@dp.message(lambda message: message.text == 'Рассчитать уборку')
+async def start_calculation(message: types.Message, state: FSMContext):
+    await state.set_state(CleaningForm.area)
+    await message.answer('Введите площадь квартиры в квадратных метрах (м²)', reply_markup=ReplyKeyboardRemove())
