@@ -25,3 +25,13 @@ kb = ReplyKeyboardMarkup(
     ],
     resize_keyboard=True
 )
+
+@dp.message(Command('start'))
+async def start(message: types.Message, state: FSMContext):
+    await state.clear()
+    await message.answer(
+        "🧹 Привет! Я бот клининговой компании «Чистота».\n"
+        "Я помогу рассчитать стоимость уборки твоей квартиры.\n"
+        "👇 Нажми на кнопку «Рассчитать уборку», чтобы начать.\n",
+        reply_markup=kb
+    )
