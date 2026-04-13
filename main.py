@@ -40,3 +40,19 @@ async def start(message: types.Message, state: FSMContext):
 async def start_calculation(message: types.Message, state: FSMContext):
     await state.set_state(CleaningForm.area)
     await message.answer('Введите площадь квартиры в квадратных метрах (м²)', reply_markup=ReplyKeyboardRemove())
+
+@dp.message(CleaningForm.area)
+async def get_area(message: types.Message, state: FSMContext):
+    if not message.text.strip():
+        await message.answer('Площадь не может быть пустой')
+        return
+    try:
+        area = float(message.text.replace(',', '.'))
+    except ValueError:
+        await message.answer("❌ Введите число (например, 45 или 45.5)")
+        return
+    
+    price = area * 200
+    await state.update_data(area=area, price=price)
+    await state.set_state(CleaningForm.name)
+    await message.answer('Как вас завут?')
